@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings>
+  <comport name="LK-G5000" port="COM1" baudrate="19200" parity="None" databit="8" stopbits="One" handshake="None" />
+  <comport name="Scanner" port="COM2" baudrate="19200" parity="None" databit="8" stopbits="One" handshake="None" />
+</Settings>
