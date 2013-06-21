@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Ports;
 using System.Xml.Linq;
+using System.Threading;
 
 namespace Reader
 {
@@ -37,7 +38,9 @@ namespace Reader
         {
             InitializeComponent();
 
-            string x = "sss\n";
+            int i = 0;
+            LKIF.RC rc = LKIF.LKIF2_OpenDeviceUsb();
+            string x = rc.ToString();
 
             _ConfigFile = Path.GetDirectoryName(Application.ExecutablePath);
             _ConfigFile = Path.Combine(_ConfigFile, "Configuration.xml");
@@ -47,6 +50,9 @@ namespace Reader
         {
             _LKG500 = new SerialPort();
             _Scanner = new SerialPort();
+
+            _LKG500.Encoding = ASCIIEncoding.ASCII;
+            _Scanner.Encoding = ASCIIEncoding.ASCII;
 
             if (!File.Exists(_ConfigFile))
             {
@@ -156,16 +162,46 @@ namespace Reader
             }
 
             string text = _LKG500.ReadExisting();
+            textBoxLog.AppendText(text);
+
+            if (text.ToCharArray()[text.Length - 1] == '\n')
+            {
+                textBoxLog.AppendText(Environment.NewLine);
+            }
+        }
+
+        private void buttonStart_Click(object sender, EventArgs e)
+        {
+            /*
+            存储周期不是“同步输入”时
+                1. 使用“数据存储设定”命令指定存储点编号与存储周期。 (第 5-22 页)
+                2. 使用“存储 (OUT)”命令指定要存储的数据的目标 OUT。 (第 5-21 页)
+                3. 使用“数据存储开始”命令开始数据存储。 (第 5-12 页)
+                4. 使用“数据存储停止”命令停止数据存储。 (第 5-12 页)
+                5. 使用“数据存储/数据输出”命令输出存储的数据。 (第 5-12 页)
+             */
+            byte[] cmd = LKGHelper.GetCommand(string.Format(LKGHelper.DataSaveLocP, 0, 1));
+            _LKG500.Write(cmd, 0, cmd.Length);
+
+            Thread.Sleep(100);
+            cmd = LKGHelper.GetCommand(string.Format(LKGHelper.DataSaveP, 0, 1));
+            _LKG500.Write(cmd, 0, cmd.Length);
+
+            Thread.Sleep(100);
+            cmd = LKGHelper.GetCommand(LKGHelper.StartDataSaving);
+            _LKG500.Write(cmd, 0, cmd.Length);
+        }
+
+        private void buttonStop_Click(object sender, EventArgs e)
+        {
+            byte[] cmd = LKGHelper.GetCommand(LKGHelper.StopDataSaving);
+            _LKG500.Write(cmd, 0, cmd.Length);
+
+            Thread.Sleep(100);
+            cmd = LKGHelper.GetCommand(LKGHelper.StartDataSaving);
+            _LKG500.Write(cmd, 0, cmd.Length);
         }
 
 
-        /*
-        存储周期不是“同步输入”时
-            1. 使用“数据存储设定”命令指定存储点编号与存储周期。 (第 5-22 页)
-            2. 使用“存储 (OUT)”命令指定要存储的数据的目标 OUT。 (第 5-21 页)
-            3. 使用“数据存储开始”命令开始数据存储。 (第 5-12 页)
-            4. 使用“数据存储停止”命令停止数据存储。 (第 5-12 页)
-            5. 使用“数据存储/数据输出”命令输出存储的数据。 (第 5-12 页)
-         */
     }
 }

@@ -81,6 +81,7 @@
             this.buttonStart.TabIndex = 1;
             this.buttonStart.Text = "Start Read";
             this.buttonStart.UseVisualStyleBackColor = true;
+            this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
             // 
             // textBoxLog
             // 
@@ -108,6 +109,7 @@
             this.buttonStop.TabIndex = 1;
             this.buttonStop.Text = "Stop Read";
             this.buttonStop.UseVisualStyleBackColor = true;
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
             // Form1
             // 
